@@ -12,3 +12,6 @@ class TrainInfo(object):
     
     def add_graph(self,model, data):
         self.writer.add_graph(model, data)
+
+
+
