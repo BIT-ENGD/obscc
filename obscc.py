@@ -142,7 +142,8 @@ def strip_chinese(strs):
 # get the list of unique vocab
 class ZnQmProcessData(threading.Thread):
     def __init__(self,DataDir,catfile,filelist,threadid,vocab,bGetVocab):
-          
+        super(ZnQmProcessData,self).__init__()
+        
         with open(DataDir+os.sep+".."+os.sep+filelist,"r") as f:
             self.allfiles=f.readlines()
 
@@ -342,10 +343,18 @@ if __name__=="__main__":
     bGenData=True
     if(bGenData):
         vocab={}
+        runner=[]
         for i in range(THREAD_NUM):
             dp=ZnQmProcessData(DATA_DIR+os.sep+DST_DIR,JSON_FILE,TRAIN_LIST,i,vocab,True)
-            dp.getvocab()
+            dp.start()
+            runner.append(dp)
 
+        for task in runner:
+            task.join()
+
+
+
+    VOCAB={}
 
     if(os.path.exists(DATASET_FILE)):
         ds=load_var(DATASET_FILE)
