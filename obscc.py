@@ -1,20 +1,13 @@
-import torch 
-from znprompt import znprompt as zp
-from torch.utils.data import DataLoader,Dataset
-import torch.nn.functional as F
+#from znprompt import znprompt as zp
 import os
 import shutil
 from pathlib import Path 
-from torchsummaryX import summary as summaryX
-import onnx 
 import pickle as pk 
-from  traininfo import TrainInfo
 import json 
 import threading 
 import math 
 import re
 import time
-from  numba  import jit ,njit 
 '''
 zpobj=zp()
 
@@ -111,9 +104,9 @@ class ZnPreprocess(threading.Thread):
             self.filenumber=math.ceil(len(filelists[i])/THREAD_NUM)
 
             if(THREAD_NUM == self.threadid+1 ):
-                self.filelist=filelists[i][self.threadid*self.filenumber:]
+                self.filelist=filelists[i][int(self.threadid*self.filenumber):]
             else:    
-                self.filelist=filelists[i][self.threadid*self.filenumber:(self.threadid+1)*self.filenumber]
+                self.filelist=filelists[i][int(self.threadid*self.filenumber):int((self.threadid+1)*self.filenumber)]
              
             for file in self.filelist:
                 oldfile=self.src+os.sep+dirs[i]+os.sep+file 
@@ -127,9 +120,9 @@ class ZnPreprocess(threading.Thread):
         return result
 
     def ProcessSrcFile(self,src,dst):
-        with open(src,encoding="utf-8") as f:
+        with open(src,mode="r") as f:
             srccontent=f.read()
-            with open(dst,mode="w",encoding="utf-8") as nf:
+            with open(dst,mode="w") as nf:
                 alllines=self.GetKeyWordSerial(srccontent)
                 nf.write("\n".join(alllines))
 
@@ -273,8 +266,8 @@ class ZnQmProcessData(threading.Thread):
 
 if __name__=="__main__":
 
-    zpobj=zp()
-    bPrepro=False  #　a switch for  the preprocessing task 
+    
+    bPrepro=True  #　a switch for  the preprocessing task 
         
     bGenData=True 
   
@@ -306,6 +299,7 @@ if __name__=="__main__":
         real_vocab=ZnQmProcessData.build_dict(vocab)
         save_var(real_vocab,VOCAB_FILE_DICT)
     else:
+
         real_vocab=load_var(VOCAB_FILE_DICT)
 
     if(bGenData):
@@ -322,6 +316,4 @@ if __name__=="__main__":
 
     endtime=time.time()
     print("total time:",endtime-starttime," (mS)" )
-    zpobj.finish()
-
     print("done!!!")
